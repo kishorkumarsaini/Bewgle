@@ -73,3 +73,52 @@ exports.getProcess = async(req, res) => {
     }
 
 };
+
+
+exports.statsEndPoint = async(req, res) => {
+
+
+    //let jsonData = await JsonModel.find();
+    //console.log(jsonData);
+
+
+    const stats = await JsonModel.aggregate([{
+        $group: {
+            _id: '$method',
+            totalRequest: { $sum: 1 },
+            avgDuration: { $avg: '$duration' }
+        }
+    }])
+
+    console.log(stats);
+
+    res.status(200).json({
+        message: 'all the request',
+        data: {
+            stats
+        }
+    })
+}
+
+exports.fromDateFilter = async(req, res) => {
+
+    const stats = await JsonModel.aggregate([{
+        $group: {
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
+            totalRequest: { $sum: 1 },
+            avgDuration: { $avg: '$duration' },
+
+        }
+
+    }]);
+
+    console.log(stats);
+
+    res.status(200).json({
+        message: 'all the request',
+        data: {
+            stats
+        }
+    });
+
+}
