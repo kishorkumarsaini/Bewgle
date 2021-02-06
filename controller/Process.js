@@ -1,25 +1,27 @@
 const JsonModel = require('../models/reqdata');
 
-let start_time = new Date().getMilliseconds();
 
-exports.processEndPoint = async(req, res) => {
+exports.processEndPoint = (req, res) => {
 
+    let start_time = new Date().getMilliseconds();
     var obj = {
         date: (new Date()).toISOString(),
         method: req.method,
         path: req.path,
-        body: req.body,
-        duration: new Date().getMilliseconds() - start_time
-    };
-
-    var reqData = JSON.stringify(obj);
-    var ParseData = JSON.parse(reqData);
-    console.log(ParseData);
-
+        body: req.body
+    }
 
     try {
-        const createObj = await JsonModel.create(ParseData);
-        res.setTimeout(ParseData.duration, () => {
+
+        res.setTimeout(15000, async() => {
+
+            obj.duration = new Date().getMilliseconds() - start_time;
+            var reqData = JSON.stringify(obj);
+
+            var ParseData = JSON.parse(reqData);
+
+            const createObj = await JsonModel.create(ParseData);
+
             res.status(200).json({
                 message: 'data successfully save',
                 data: {
@@ -44,18 +46,26 @@ exports.getProcess = async(req, res) => {
         date: (new Date()).toISOString(),
         method: req.method,
         path: req.path,
-        query: req.query,
-        duration: new Date().getMilliseconds() - start_time
+        query: req.query
     };
-    let reqData = JSON.stringify(obj);
-    let ParseData = JSON.parse(reqData);
 
     try {
-        await JsonModel.create(ParseData);
-        console.log(ParseData);
-        var getJson = await JsonModel.find();
-        console.log(getJson);
-        res.setTimeout(ParseData.duration, () => {
+        res.setTimeout(15000, async() => {
+
+            let start_time = new Date().getMilliseconds();
+
+            obj.duration = new Date().getMilliseconds() - start_time;
+
+            let reqData = JSON.stringify(obj);
+
+            let ParseData = JSON.parse(reqData);
+
+            //save the data 
+            await JsonModel.create(ParseData);
+
+            //get the data
+            var getJson = await JsonModel.find();
+
             res.status(201).json({
                 message: 'data successfully save',
                 data: {
@@ -78,10 +88,6 @@ exports.getProcess = async(req, res) => {
 exports.statsEndPoint = async(req, res) => {
 
 
-    //let jsonData = await JsonModel.find();
-    //console.log(jsonData);
-
-
     const stats = await JsonModel.aggregate([{
         $group: {
             _id: '$method',
@@ -90,7 +96,6 @@ exports.statsEndPoint = async(req, res) => {
         }
     }])
 
-    console.log(stats);
 
     res.status(200).json({
         message: 'all the request',
@@ -111,8 +116,6 @@ exports.fromDateFilter = async(req, res) => {
         }
 
     }]);
-
-    console.log(stats);
 
     res.status(200).json({
         message: 'all the request',
